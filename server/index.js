@@ -3,13 +3,24 @@ const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
-require('dotenv').config(); // ✅ Đã thêm: dùng dotenv để đọc file .env
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// ✅ Đã sửa: thay thế chuỗi kết nối cứng bằng biến môi trường
+// ✅ Cập nhật origin cụ thể (thay URL bằng domain frontend của bạn)
+const allowedOrigins = [
+  'http://localhost:5173', // local dev
+  'https://kahoot-1-2evh.onrender.com' // 🔁 domain frontend deploy trên Render
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+app.use(express.json());
+app.options('*', cors()); // ✅ Để xử lý preflight CORS
+
+// ✅ Kết nối MongoDB
 mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -20,7 +31,7 @@ db.once('open', () => {
   console.log('✅ Kết nối MongoDB thành công');
 });
 
-// Định nghĩa model User
+// ✅ Model User
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
@@ -29,7 +40,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// API Đăng ký
+// ✅ API Đăng ký
 app.post('/api/register', async (req, res) => {
   const { name, email, password, birthdate } = req.body;
   try {
@@ -45,7 +56,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// API Đăng nhập
+// ✅ API Đăng nhập
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -60,13 +71,17 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// ✅ Khởi tạo Server & Socket.IO
 const server = http.createServer(app);
-
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
 });
 
-// Dữ liệu phòng lưu trong RAM
+// ✅ Rooms lưu trong RAM
 const rooms = {};
 
 io.on('connection', (socket) => {
@@ -75,7 +90,6 @@ io.on('connection', (socket) => {
   socket.on('host-join', (pin) => {
     console.log(`🟢 Host tạo phòng với mã PIN: ${pin}`);
     socket.join(pin);
-
     if (!rooms[pin]) {
       rooms[pin] = {
         hostId: socket.id,
@@ -98,7 +112,6 @@ io.on('connection', (socket) => {
     if (room) {
       room.players.push({ name, score: 0, socketId: socket.id });
       socket.join(pin);
-
       io.to(room.hostId).emit('player-joined', name);
       socket.emit('join-success');
     } else {
@@ -153,7 +166,6 @@ function sendQuestion(pin) {
   const currentQ = room.questions[room.currentQuestion];
 
   io.to(room.hostId).emit('receive-question', currentQ);
-
   for (const player of room.players) {
     const playerSocket = io.sockets.sockets.get(player.socketId);
     if (playerSocket) {
@@ -162,13 +174,8 @@ function sendQuestion(pin) {
   }
 }
 
-server.listen(3000, () => {
-  console.log('🚀 Server chạy tại http://localhost:3000');
-});
-
-// ✅ Đã thêm: xử lý lưu quiz
+// ✅ API Lưu Quiz
 const Quiz = require('./models/Quiz');
-
 app.post('/api/quizzes', async (req, res) => {
   const { title, createdBy, questions } = req.body;
   try {
@@ -178,4 +185,9 @@ app.post('/api/quizzes', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi khi lưu quiz' });
   }
+});
+
+// ✅ Lắng nghe cổng
+server.listen(3000, () => {
+  console.log('🚀 Server chạy tại http://localhost:3000');
 });
