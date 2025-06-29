@@ -23,8 +23,8 @@ const router = useRouter()
 const handleLogin = async () => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, {
-      email: email.value,
-      password: password.value
+      email: email.value.trim,
+      password: password.value.trim
     })
 
     if (response.data.success) {

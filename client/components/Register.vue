@@ -26,10 +26,10 @@ const router = useRouter()
 const handleRegister = async () => {
   try {
     await axios.post(`${import.meta.env.VITE_API_URL}/api/Register`, {
-      name: name.value,
-      email: email.value,
-      password: password.value,
-      birthdate: birthdate.value
+      name: name.value.trim,
+      email: email.value.trim,
+      password: password.value.trim,
+      birthdate: birthdate.value.trim
     })
     alert('Đăng ký thành công!')
     router.push('/login')
