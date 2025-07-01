@@ -1,9 +1,34 @@
 <template>
-  <div class="enter-code">
-    <h2>Nhập mã phòng</h2>
-    <input v-model="roomCode" placeholder="Nhập mã phòng..." />
-    <input v-model="playerName" placeholder="Tên người chơi..." />
-    <button @click="joinRoom">Vào phòng</button>
+  <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-primary">Nhập mã phòng</h2>
+    </div>
+
+    <div class="w-100" style="max-width: 400px;">
+      <div class="mb-3">
+        <input
+          v-model="roomCode"
+          type="text"
+          class="form-control form-control-lg"
+          placeholder="Nhập mã phòng..."
+        />
+      </div>
+
+      <div class="mb-4">
+        <input
+          v-model="playerName"
+          type="text"
+          class="form-control form-control-lg"
+          placeholder="Tên người chơi..."
+        />
+      </div>
+
+      <div class="text-center">
+        <button class="btn btn-success btn-lg w-100" @click="joinRoom">
+          🎮 Vào phòng
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -28,21 +53,18 @@ function joinRoom() {
   const player = {
     id: playerId,
     name: playerName.value || 'Người chơi ẩn danh',
-    avatar: '' // Bạn có thể thêm tính năng chọn avatar sau
+    avatar: '' // có thể thêm sau
   }
 
-  // Lưu vào localStorage để dùng ở trang chờ
   localStorage.setItem('playerName', player.name)
   localStorage.setItem('playerId', player.id)
   localStorage.setItem('playerAvatar', player.avatar)
 
-  // Gửi thông tin join-room
   socket.emit('join-room', {
     roomId: roomCode.value,
     player
   })
 
-  // Lắng nghe phản hồi để vào phòng
   socket.once('room-updated', () => {
     router.push(`/join-room/${roomCode.value}`)
   })
@@ -52,48 +74,3 @@ function joinRoom() {
   })
 }
 </script>
-
-<style scoped>
-.enter-code {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.enter-code h2 {
-  font-size: 32px;
-  margin-bottom: 20px;
-  color: #4a148c;
-}
-
-.enter-code input {
-  padding: 10px 20px;
-  font-size: 18px;
-  border: none;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  width: 250px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.enter-code button {
-  background-color: #4a148c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transition: transform 0.1s ease;
-}
-
-.enter-code button:hover {
-  transform: scale(1.05);
-}
-</style>

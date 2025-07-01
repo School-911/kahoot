@@ -1,31 +1,40 @@
 <template>
-  <div class="question-display" v-if="questions.length">
-    <div class="top-bar">
-      <div class="timer">⏳ {{ countdown }}s</div>
-      <button class="next-btn" @click="nextQuestion" :disabled="isLastQuestion">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="h5">⏳ {{ countdown }}s</div>
+      <button class="btn btn-primary" @click="nextQuestion" :disabled="isLastQuestion">
         Next
       </button>
     </div>
 
-    <div class="question-area">
-      <h2 class="question-text">{{ currentQuestion.text }}</h2>
+    <div v-if="questions.length">
+      <h2 class="mb-4 text-center">{{ currentQuestion.text }}</h2>
 
-      <div class="options-grid">
+      <div class="row g-3">
         <div
           v-for="(opt, index) in currentQuestion.options"
-          :key="opt._id"
-          class="option"
-          :style="{ backgroundColor: colors[index] }"
-          @click="selectAnswer(opt._id)"
+          :key="opt._id || index"
+          class="col-6"
         >
-          <span class="shape">{{ shapes[index] }}</span>
-          <span class="text">{{ opt.text }}</span>
+          <div
+            class="card text-white text-center"
+            :style="{ backgroundColor: colors[index] }"
+            @click="selectAnswer(opt._id)"
+            style="cursor: pointer;"
+          >
+            <div class="card-body">
+              <div class="display-6">{{ shapes[index] }}</div>
+              <div class="fs-5">{{ opt.text }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div v-else class="loading">⏳ Đang tải câu hỏi...</div>
+    <div v-else class="text-center fs-4 py-5">
+      ⏳ Đang tải câu hỏi...
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -68,39 +77,25 @@ function selectAnswer(index) {
 onMounted(async () => {
   try {
     const res = await axios.get('/api/game-question/ngau-nhien')
+    console.log('✅ Kết quả API:', res.data)
+
     questions.value = res.data.map(q => ({
       text: q.noiDung,
       options: q.luaChon
     }))
-    startCountdown()
+
+    if (questions.value.length > 0) {
+      startCountdown()
+    }
   } catch (err) {
-    console.error('Không lấy được câu hỏi:', err)
+    console.error('❌ Không lấy được câu hỏi:', err)
   }
 })
 </script>
 
-
 <style scoped>
-/* giữ nguyên style cũ bạn có */
-.question-display {
-  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
-  min-height: 100vh;
-  padding: 20px;
-  font-family: sans-serif;
-  position: relative;
+/* Nếu muốn giữ hình dạng đáp án đặc biệt */
+.card-body {
+  padding: 1.5rem;
 }
-.loading {
-  padding: 100px;
-  text-align: center;
-  font-size: 28px;
-}
-.top-bar { /* ... */ }
-.timer { /* ... */ }
-.next-btn { /* ... */ }
-.question-area { /* ... */ }
-.question-text { /* ... */ }
-.options-grid { /* ... */ }
-.option { /* ... */ }
-.option:hover { /* ... */ }
-.shape { /* ... */ }
 </style>

@@ -1,23 +1,25 @@
 <template>
-  <div class="lobby">
-    <div class="top-bar">
-      <div class="game-pin">
-        Game PIN:<br />
-        <span class="pin"><strong>{{ roomId }}</strong></span>
+  <div class="d-flex flex-column justify-content-between align-items-center min-vh-100 py-5 bg-light position-relative">
+    <!-- Game PIN -->
+    <div class="bg-white px-4 py-2 rounded shadow text-center position-absolute top-0 start-50 translate-middle-x mt-4">
+      <div class="fw-bold text-secondary">Game PIN</div>
+      <div class="fs-3 text-primary">{{ roomId }}</div>
+    </div>
+
+    <!-- Main content -->
+    <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+      <h1 class="display-5 fw-bold mb-4 text-dark">Đang chờ bắt đầu...</h1>
+
+      <div class="bg-primary text-white px-4 py-3 rounded shadow d-flex align-items-center gap-3">
+        <div class="fs-4 fw-bold">{{ player.name }}</div>
       </div>
     </div>
 
-    <div class="screen">
-      <h1 class="title">Đang chờ bắt đầu...</h1>
-      <div class="player-box">
-        <span class="player-name">{{ player.name }}</span>
-      </div>
-    </div>
-
-    <div class="bottom-bar">
-      <span class="volume">🔊</span>
-      <span class="settings">⚙️</span>
-      <span class="fullscreen">⛶</span>
+    <!-- Bottom controls -->
+    <div class="d-flex gap-4 fs-4 text-muted mb-3">
+      <span title="Âm lượng">🔊</span>
+      <span title="Cài đặt">⚙️</span>
+      <span title="Toàn màn hình">⛶</span>
     </div>
   </div>
 </template>
@@ -40,7 +42,6 @@ onMounted(() => {
   const storedName = localStorage.getItem('playerName') || 'Người chơi ẩn danh'
   player.value.name = storedName
 
-  // Gửi join-room
   socket.emit('join-room', {
     roomId: roomId.value,
     player: {
@@ -50,78 +51,3 @@ onMounted(() => {
   })
 })
 </script>
-
-<style scoped>
-.lobby {
-  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
-  font-family: sans-serif;
-  position: relative;
-  min-height: 100vh;
-  margin-top: -100px;
-}
-
-.top-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: white;
-  font-size: 16px;
-  z-index: 100;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 20px;
-  width: 200px;
-}
-
-.game-pin {
-  text-align: center;
-  font-size: 20px;
-}
-
-.pin {
-  font-size: 36px;
-  font-weight: bold;
-}
-
-.screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 70vh;
-  margin-top: 100px;
-  gap: 20px;
-}
-
-.title {
-  font-size: 36px;
-  margin-bottom: 20px;
-  color: white;
-  text-shadow: 2px 2px 4px #000;
-}
-
-.player-box {
-  display: flex;
-  align-items: center;
-  background: #4a148c;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  gap: 10px;
-}
-
-.player-name {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.bottom-bar {
-  position: absolute;
-  bottom: 20px;
-  right: 30px;
-  display: flex;
-  gap: 20px;
-  font-size: 20px;
-}
-</style>
