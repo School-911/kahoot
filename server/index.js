@@ -47,9 +47,7 @@ const clientPath = path.resolve(__dirname, '../client/dist')
 app.use(express.static(clientPath))
 
 // 👉 Bắt tất cả route còn lại => trả index.html (SPA)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientPath, 'index.html'))
-})
+
 
 // Lắng nghe server
 const PORT = process.env.PORT || 5000
