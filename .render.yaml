@@ -1,0 +1,7 @@
+buildCommand: npm run build
+startCommand: serve dist
+publishPath: dist
+routes:
+  - type: rewrite
+    source: /.*
+    destination: /index.html
