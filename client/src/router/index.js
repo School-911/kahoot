@@ -8,7 +8,9 @@ import TrangChu2 from '../pages/TrangChu2.vue'
 import ViewNguoiChoi from '../pages/ViewNguoiChoi.vue'
 
 const routes = [
-  { path: '/', redirect: '/trang-chu' },
+  { path: '/', redirect: TrangChu },
+  { path: '/taocauhoi', component: TaoCauHoi },
+  { path: '/',component : '/trang-chu' },
   { path: '/trang-chu', component: TrangChu2 },
   { path: '/admin/taocauhoi', component: TaoCauHoi },
   { path: '/question/:roomId', component: CauHoi, props: true },
