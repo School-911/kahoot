@@ -57,53 +57,79 @@
 </template>
 <script>
 import axios from 'axios'
+import { ref, onMounted } from 'vue'
 
 export default {
-  data() {
-    return {
-      noiDung: '',
-      dapAnList: ['', '', '', ''],
-      dapAnDung: '',
-      shapes: ['▲', '◆', '●', '■'],
-      colors: ['#f44336', '#2196f3', '#ffeb3b', '#4caf50'],
-      apiUrl: import.meta.env.VITE_API || '',
-    }
-  },
-  methods: {
-    async taoCauHoi() {
-      if (!this.apiUrl) return alert('Chưa cấu hình VITE_API')
+  setup() {
+    const noiDung = ref('')
+    const dapAnList = ref(['', '', '', ''])
+    const dapAnDung = ref('')
+    const danhSachCauHoi = ref([])
 
-      if (!this.noiDung || this.dapAnList.some(d => !d) || this.dapAnDung === '') {
+    const shapes = ['▲', '◆', '●', '■']
+    const colors = ['#f44336', '#2196f3', '#ffeb3b', '#4caf50']
+    const apiUrl = import.meta.env.VITE_API || ''
+
+    const loadDanhSach = async () => {
+      try {
+        const res = await axios.get(`${apiUrl}/cau-hoi`)
+        danhSachCauHoi.value = res.data
+      } catch (err) {
+        console.error('❌ Lỗi lấy câu hỏi:', err)
+      }
+    }
+
+    const taoCauHoi = async () => {
+      if (!apiUrl) return alert('Chưa cấu hình VITE_API')
+
+      if (!noiDung.value || dapAnList.value.some(d => !d) || dapAnDung.value === '') {
         return alert('Vui lòng điền đủ câu hỏi và đáp án, chọn đáp án đúng!')
       }
 
       try {
-        const res = await axios.post(`${this.apiUrl}/cau-hoi`, {
-          noiDung: this.noiDung,
-          luaChon: this.dapAnList,
-          dapAnDung: parseInt(this.dapAnDung),
+        await axios.post(`${apiUrl}/cau-hoi`, {
+          noiDung: noiDung.value,
+          luaChon: dapAnList.value,
+          dapAnDung: parseInt(dapAnDung.value),
         })
         alert('✅ Thêm câu hỏi thành công')
-        this.noiDung = ''
-        this.dapAnList = ['', '', '', '']
-        this.dapAnDung = ''
+        noiDung.value = ''
+        dapAnList.value = ['', '', '', '']
+        dapAnDung.value = ''
+        await loadDanhSach()
       } catch (err) {
         alert('Lỗi tạo câu hỏi: ' + (err.response?.data?.message || 'Không xác định'))
       }
-    },
-    themDapAn() {
-      if (this.dapAnList.length < 6) {
-        this.dapAnList.push('')
-        this.shapes.push('⬠')
-        this.colors.push('#9c27b0') // màu mới
+    }
+
+    const themDapAn = () => {
+      if (dapAnList.value.length < 6) {
+        dapAnList.value.push('')
+        shapes.push('⬠')
+        colors.push('#9c27b0')
       } else {
         alert('Tối đa 6 đáp án!')
       }
-    },
-    themCauHoi() {
-      this.noiDung = ''
-      this.dapAnList = ['', '', '', '']
-      this.dapAnDung = ''
+    }
+
+    const themCauHoi = () => {
+      noiDung.value = ''
+      dapAnList.value = ['', '', '', '']
+      dapAnDung.value = ''
+    }
+
+    onMounted(loadDanhSach)
+
+    return {
+      noiDung,
+      dapAnList,
+      dapAnDung,
+      danhSachCauHoi,
+      shapes,
+      colors,
+      taoCauHoi,
+      themCauHoi,
+      themDapAn
     }
   }
 }
