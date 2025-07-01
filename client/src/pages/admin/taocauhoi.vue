@@ -57,6 +57,11 @@ export default {
   },
   methods: {
     async taoCauHoi() {
+            console.log('Dữ liệu gửi:', {
+  noiDung: this.noiDung,
+  dapAn: this.dapAnList,
+  dapAnDung: this.dapAnList[this.dapAnDung], // nếu bạn sửa thành gửi nội dung đáp án
+})
     try {
       const res = await axios.post(`${import.meta.env.VITE_API}/cau-hoi`, {
         noiDung: this.noiDung,
