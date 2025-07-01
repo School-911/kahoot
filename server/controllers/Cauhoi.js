@@ -1,5 +1,5 @@
 // server/controllers/Cauhoi.js
-import CauHoi from '../models/cauhoii.js'
+import CauHoi from '../models/cauhoimodel.js'
 
 export const layCauHoiNgauNhien = async (req, res) => {
   try {
