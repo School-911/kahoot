@@ -37,3 +37,17 @@ const PORT = process.env.PORT || 5000
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`)
 })
+
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const clientPath = path.resolve(__dirname, '../client/dist')
+
+// Dùng Express để serve static từ dist
+app.use(express.static(clientPath))
+
+// Bắt tất cả route còn lại => trả index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'))
+})
