@@ -1,3 +1,5 @@
+import CauHoi from '../models/CauHoi.js' // ✅ Quan trọng
+
 export const taoCauHoi = async (req, res) => {
   try {
     const cauHoiMoi = new CauHoi(req.body)
