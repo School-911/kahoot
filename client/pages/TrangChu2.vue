@@ -22,7 +22,7 @@ function createRoom() {
 }
 </script>
 
-<style scoped>
+<style>
 .host-home {
   min-height: 100vh;
   display: flex;
