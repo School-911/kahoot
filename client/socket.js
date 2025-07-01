@@ -1,14 +1,16 @@
-// Gửi request ping để đánh thức backend trước
+import { io } from 'socket.io-client';
+
+let socket;
+
 fetch(import.meta.env.VITE_SOCKET_URL + '/ping')
   .then(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL, {
+    socket = io(import.meta.env.VITE_SOCKET_URL, {
       transports: ['websocket'],
       withCredentials: true
     });
-
-    // dùng socket ở đây...
-    console.log("✅ Socket kết nối sau khi ping backend");
   })
   .catch((err) => {
-    console.error("❌ Backend chưa sẵn sàng:", err);
+    console.error('Không thể kết nối backend:', err);
   });
+
+export default socket;
