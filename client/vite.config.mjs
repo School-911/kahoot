@@ -1,25 +1,17 @@
-import { defineConfig } from 'vite'
+// client/vite.config.js
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/', // 👈 Thêm dòng này
   plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    }
-  },
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000', // Hoặc URL của backend
+        target: 'https://kahoot-4f1i.onrender.com',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')
+        // KHÔNG rewrite /api
       }
     }
-  },
-  build: {
-    outDir: '../server/client-dist', // Xuất build vào server
-    emptyOutDir: true
   }
 })
