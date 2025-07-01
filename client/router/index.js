@@ -1,12 +1,12 @@
 // client/src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
-import TaoCauHoi from '../pages/admin/taocauhoi.vue'
-import Cauhoi from '../pages/Cauhoi.vue'
-import Sanhchoadmin from '../pages/Sanhchoadmin.vue'
-import Thamgia from '../pages/Thamgia.vue'
-import Trangchu2 from '../pages/Trangchu2.vue'
-import Viewnguoichoi from '../pages/Viewnguoichoi.vue'
+import TaoCauHoi from '../pages/admin/TaoCauHoi.vue'
+import Cauhoi from '../pages/CauHoi.vue'
+import Sanhchoadmin from '../pages/SanhChoAdmin.vue'
+import Thamgia from '../pages/ThamGia.vue'
+import Trangchu2 from '../pages/TrangChu2.vue'
+import Viewnguoichoi from '../pages/ViewNguoiChoi.vue'
 
 const routes = [
   {
@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/question/:roomId',
     name: 'Cauhoi',
-    component: Cauhoi,
+    component: CauHoi,
     props: true
   },
   {
@@ -37,7 +37,7 @@ const routes = [
   },
   {
     path: '/Tham-gia/:roomId',
-    name: 'Thamgia',
+    name: 'ThamGia',
     component: Thamgia
   },
   {
