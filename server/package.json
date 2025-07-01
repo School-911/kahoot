@@ -1,5 +1,5 @@
 {
-  "name": "kahoot-backend",
+  "name": "server",
   "version": "1.0.0",
   "description": "Backend cho web giống Kahoot (Express + MongoDB Atlas)",
   "type": "module",
