@@ -57,20 +57,20 @@ export default {
   },
   methods: {
     async taoCauHoi() {
-      try {
-        const res = await axios.post(`${import.meta.env.VITE_API}/cau-hoi`, {
-          noiDung: this.noiDung,
-          dapAn: this.dapAnList,
-          dapAnDung: this.dapAnDung,
-        })
-        alert('Thêm câu hỏi thành công!')
-        this.noiDung = ''
-        this.dapAnList = ['', '', '', '']
-        this.dapAnDung = ''
-      } catch (err) {
-        alert('Lỗi khi thêm câu hỏi!')
-        console.error(err)
-      }
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/cau-hoi`, {
+        noiDung: this.noiDung,
+        dapAn: this.dapAnList,
+        dapAnDung: this.dapAnDung,
+      })
+      alert('Thêm câu hỏi thành công!')
+      this.noiDung = ''
+      this.dapAnList = ['', '', '', '']
+      this.dapAnDung = ''
+    } catch (err) {
+      console.error('Lỗi chi tiết:', err.response?.data || err.message)
+      alert(`Lỗi khi thêm câu hỏi: ${err.response?.data?.message || 'Không xác định'}`)
+    }
     },
   },
 }
