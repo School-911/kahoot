@@ -1,4 +1,3 @@
-// client/src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
 import TaoCauHoi from '../pages/admin/TaoCauHoi.vue'
@@ -11,7 +10,7 @@ import ViewNguoiChoi from '../pages/ViewNguoiChoi.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/trang-chu' // 👉 Tự động về trang chủ
+    redirect: '/trang-chu' // ✅ đúng cú pháp tuyệt đối
   },
   {
     path: '/trang-chu',
@@ -36,7 +35,7 @@ const routes = [
     props: true
   },
   {
-    path: '/Tham-gia/:roomId',
+    path: '/tham-gia/:roomId', // nên viết thường
     name: 'ThamGia',
     component: ThamGia
   },
