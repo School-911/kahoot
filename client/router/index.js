@@ -10,7 +10,7 @@ import ViewNguoiChoi from '../pages/ViewNguoiChoi.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/admin/taocauhoi' // 👉 Tự động vào trang tạo câu hỏi
+    redirect: '/waiting-room' // 👉 Tự động vào trang tạo câu hỏi
   },
   {
     path: '/trang-chu',
