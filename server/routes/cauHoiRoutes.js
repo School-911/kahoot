@@ -10,3 +10,4 @@ router.get('/ngau-nhien', layCauHoiNgauNhien)
 
 router.get('/:id', layCauHoiTheoId)
 
+export default router
