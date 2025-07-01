@@ -1,3 +1,4 @@
+// routes/cauHoiRoutes.js
 import express from 'express'
 import {
   taoCauHoi,
@@ -10,11 +11,11 @@ import {
 
 const router = express.Router()
 
-router.post('/', taoCauHoi)
-router.get('/ngau-nhien', layCauHoiNgauNhien)
-router.get('/', layTatCaCauHoi)
-router.get('/:id', layCauHoiTheoId)
-router.put('/:id', capNhatCauHoi)
-router.delete('/:id', xoaCauHoi)
+router.post('/', taoCauHoi)                    // Tạo câu hỏi
+router.get('/ngau-nhien', layCauHoiNgauNhien)  // Lấy 1 câu ngẫu nhiên
+router.get('/', layTatCaCauHoi)                // Lấy tất cả
+router.get('/:id', layCauHoiTheoId)            // Lấy theo id
+router.put('/:id', capNhatCauHoi)              // Cập nhật theo id
+router.delete('/:id', xoaCauHoi)               // Xoá theo id
 
 export default router

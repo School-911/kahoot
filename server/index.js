@@ -1,29 +1,41 @@
+// server/index.js
 import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
-// 👉 Trỏ đúng vào file route bạn đã có
 import cauHoiRoutes from './routes/cauHoiRoutes.js'
+import { initSocket } from './socket/index.js'
+import choigame from './routes/choigame.js'
 
 dotenv.config()
 
 const app = express()
+const httpServer = createServer(app)
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*'
+  }
+})
 
-// Cho phép frontend gọi từ domain khác (nếu có)
 app.use(cors())
-// Đọc JSON từ body request
 app.use(express.json())
+app.use('/api/game-question', choigame)
 
-// Đăng ký route câu hỏi
+// REST API
 app.use('/api/cau-hoi', cauHoiRoutes)
 
-// Kết nối MongoDB Atlas
+// SOCKET.IO
+initSocket(io)
+
+// MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Đã kết nối MongoDB Atlas'))
-  .catch(err => console.error('❌ Kết nối thất bại:', err))
+  .then(() => console.log('✅ Đã kết nối MongoDB'))
+  .catch(err => console.error('❌ Kết nối MongoDB thất bại:', err))
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`)
 })
