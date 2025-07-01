@@ -6,24 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "serve dist"
   },
   "dependencies": {
     "axios": "^1.6.7",
     "bootstrap": "^5.3.7",
-    "core-js": "^3.37.0",
     "vue": "^3.4.15",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.11",
     "@vitejs/plugin-vue": "^6.0.0",
-    "@vue/cli-plugin-babel": "^5.0.0",
-    "@vue/cli-service": "^5.0.0",
-    "autoprefixer": "^10.4.21",
-    "babel-eslint": "^10.1.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.11",
-    "vite": "^5.4.19"
+    "autoprefixer": "^10.4.21",
+    "vite": "^5.4.19",
+    "serve": "^14.2.4"
   }
 }
