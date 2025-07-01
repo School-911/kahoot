@@ -78,8 +78,11 @@ const io = new Server(server, {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
-  }
+  },
+  transports: ['websocket'], // ✅ Bắt buộc để tránh lỗi polling trên Render
+  allowEIO3: true // ✅ Đảm bảo hoạt động với phiên bản client cũ nếu có
 });
+
 
 // ✅ Rooms lưu trong RAM
 const rooms = {};
