@@ -48,13 +48,19 @@ httpServer.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`)
 })
 
+// server/index.js
+
 import path from 'path'
 import { fileURLToPath } from 'url'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Serve static files từ client/dist
 app.use(express.static(path.join(__dirname, '../client/dist')))
 
-// Catch all route để frontend xử lý router (Vue Router)
+// Gửi lại index.html cho tất cả route không phải API (cho Vue Router)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'))
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'))
+  }
 })
