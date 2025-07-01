@@ -47,3 +47,14 @@ const PORT = process.env.PORT || 5000
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`)
 })
+
+import path from 'path'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+app.use(express.static(path.join(__dirname, '../client/dist')))
+
+// Catch all route để frontend xử lý router (Vue Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'))
+})
