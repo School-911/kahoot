@@ -53,29 +53,30 @@ export default {
       noiDung: '',
       dapAnList: ['', '', '', ''],
       dapAnDung: '',
+      apiUrl: import.meta.env.VITE_API || '', // ✅ Gán 1 lần tại đây để dễ debug
     }
   },
   methods: {
     async taoCauHoi() {
-            console.log('Dữ liệu gửi:', {
-  noiDung: this.noiDung,
-  dapAn: this.dapAnList,
-  dapAnDung: this.dapAnList[this.dapAnDung], // nếu bạn sửa thành gửi nội dung đáp án
-})
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/cau-hoi`, {
-        noiDung: this.noiDung,
-        dapAn: this.dapAnList,
-        dapAnDung: this.dapAnDung,
-      })
-      alert('Thêm câu hỏi thành công!')
-      this.noiDung = ''
-      this.dapAnList = ['', '', '', '']
-      this.dapAnDung = ''
-    } catch (err) {
-      console.error('Lỗi chi tiết:', err.response?.data || err.message)
-      alert(`Lỗi khi thêm câu hỏi: ${err.response?.data?.message || 'Không xác định'}`)
-    }
+      if (!this.apiUrl) {
+        alert('API URL không tồn tại! Bạn đã cấu hình VITE_API trong .env chưa?')
+        return
+      }
+
+      try {
+        const res = await axios.post(`${this.apiUrl}/cau-hoi`, {
+          noiDung: this.noiDung,
+          dapAn: this.dapAnList,
+          dapAnDung: this.dapAnList[this.dapAnDung],
+        })
+        alert('Thêm câu hỏi thành công!')
+        this.noiDung = ''
+        this.dapAnList = ['', '', '', '']
+        this.dapAnDung = ''
+      } catch (err) {
+        console.error('Lỗi chi tiết:', err.response?.data || err.message)
+        alert(`Lỗi khi thêm câu hỏi: ${err.response?.data?.message || 'Không xác định'}`)
+      }
     },
   },
 }
