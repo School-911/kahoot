@@ -1,7 +1,7 @@
 // server/socket/joinRoom.js
 const rooms = new Map()
 
-export function registerJoinRoomHandler(io, socket) {
+export function registerJoinRoom(io, socket) {
   socket.on('join-room', ({ roomId, player }) => {
     if (!roomId || !player || !player.id) {
       socket.emit('error', 'Thiếu thông tin phòng hoặc người chơi')
