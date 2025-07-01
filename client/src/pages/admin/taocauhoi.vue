@@ -63,11 +63,16 @@ export default {
         return
       }
 
+      if (!this.noiDung || this.dapAnList.some(d => !d) || this.dapAnDung === '') {
+        alert('Vui lòng nhập đầy đủ nội dung và các đáp án, đồng thời chọn đáp án đúng.')
+        return
+      }
+
       try {
         const res = await axios.post(`${this.apiUrl}/cau-hoi`, {
           noiDung: this.noiDung,
-          dapAn: this.dapAnList,
-          dapAnDung: this.dapAnList[this.dapAnDung],
+          luaChon: this.dapAnList,                   // ✅ đúng tên theo schema
+          dapAnDung: parseInt(this.dapAnDung),       // ✅ đúng kiểu là index
         })
         alert('Thêm câu hỏi thành công!')
         this.noiDung = ''
@@ -77,7 +82,7 @@ export default {
         console.error('Lỗi chi tiết:', err.response?.data || err.message)
         alert(`Lỗi khi thêm câu hỏi: ${err.response?.data?.message || 'Không xác định'}`)
       }
-    },
+    }
   },
 }
 </script>
