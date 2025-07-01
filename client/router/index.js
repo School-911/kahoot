@@ -2,11 +2,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import TaoCauHoi from '../pages/admin/TaoCauHoi.vue'
-import Cauhoi from '../pages/CauHoi.vue'
-import Sanhchoadmin from '../pages/SanhChoAdmin.vue'
-import Thamgia from '../pages/ThamGia.vue'
-import Trangchu2 from '../pages/TrangChu2.vue'
-import Viewnguoichoi from '../pages/ViewNguoiChoi.vue'
+import CauHoi from '../pages/CauHoi.vue'
+import SanhChoAdmin from '../pages/SanhChoAdmin.vue'
+import ThamGia from '../pages/ThamGia.vue'
+import TrangChu2 from '../pages/TrangChu2.vue'
+import ViewNguoiChoi from '../pages/ViewNguoiChoi.vue'
 
 const routes = [
   {
@@ -16,7 +16,7 @@ const routes = [
   {
     path: '/trang-chu',
     name: 'TrangChu',
-    component: Trangchu2
+    component: TrangChu2
   },
   {
     path: '/admin/taocauhoi',
@@ -32,18 +32,18 @@ const routes = [
   {
     path: '/waiting-room/:roomId',
     name: 'SanhChoAdmin',
-    component: Sanhchoadmin,
+    component: SanhChoAdmin,
     props: true
   },
   {
     path: '/Tham-gia/:roomId',
     name: 'ThamGia',
-    component: Thamgia
+    component: ThamGia
   },
   {
     path: '/join-room/:roomId',
     name: 'ViewNguoiChoi',
-    component: Viewnguoichoi,
+    component: ViewNguoiChoi,
     props: true
   }
 ]
