@@ -15,7 +15,7 @@ const routes = [
   },
   {
     path: '/trang-chu',
-    name: 'TrangChu',
+    name: 'TrangChu2',
     component: Trangchu2
   },
   {
