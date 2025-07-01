@@ -121,7 +121,7 @@ const submitTaoCauHoi = async () => {
   }
 
   try {
-    await axios.post('http://localhost:5000/api/cau-hoi', {
+    await axios.post(`${import.meta.env.VITE_API_URL}/cau-hoi`, {
       noiDung: noiDungCauHoi.value,
       luaChon: danhSachDapAn.value,
       dapAnDung: dapAnDung.value,
