@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router' // ✅ Dùng hash mode
 
 import TaoCauHoi from '../pages/admin/TaoCauHoi.vue'
 import CauHoi from '../pages/CauHoi.vue'
@@ -8,9 +8,7 @@ import TrangChu2 from '../pages/TrangChu2.vue'
 import ViewNguoiChoi from '../pages/ViewNguoiChoi.vue'
 
 const routes = [
-  { path: '/', redirect: TrangChu },
-  { path: '/taocauhoi', component: TaoCauHoi },
-  { path: '/',component : '/trang-chu' },
+  { path: '/', redirect: '/trang-chu' },
   { path: '/trang-chu', component: TrangChu2 },
   { path: '/admin/taocauhoi', component: TaoCauHoi },
   { path: '/question/:roomId', component: CauHoi, props: true },
@@ -20,7 +18,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(), // ✅ Đổi sang hash mode
   routes
 })
 
