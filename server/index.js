@@ -27,10 +27,7 @@ app.use('/api/cau-hoi', cauHoiRoutes)
 const clientPath = path.join(__dirname, 'client-dist')
 app.use(express.static(clientPath))
 
-// Route fallback for Vue Router
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientPath, 'index.html'))
-})
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on http://localhost:${PORT}`)
