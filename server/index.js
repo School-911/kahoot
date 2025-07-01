@@ -7,10 +7,9 @@ require('dotenv').config();
 
 const app = express();
 
-// ✅ Cập nhật origin cụ thể (thay URL bằng domain frontend của bạn)
 const allowedOrigins = [
-  'http://localhost:5173', // local dev
-  'https://kahoot-1-2evh.onrender.com' // 🔁 domain frontend deploy trên Render
+  'http://localhost:5173',
+  'https://kahoot-ova0.onrender.com'
 ];
 
 app.use(cors({
@@ -18,9 +17,9 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.options('*', cors()); // ✅ Để xử lý preflight CORS
+app.options('*', cors());
 
-// ✅ Kết nối MongoDB
+// ✅ Kết nối MongoDB Atlas
 mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -28,50 +27,93 @@ mongoose.connect(process.env.MONGO_URL, {
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, '❌ MongoDB error:'));
 db.once('open', () => {
-  console.log('✅ Kết nối MongoDB thành công');
+  console.log('✅ Đã kết nối MongoDB thành công');
 });
 
-// ✅ Model User
+// ✅ Mô hình User
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
   password: String,
   birthdate: String
 });
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema, 'users');
 
 // ✅ API Đăng ký
 app.post('/api/register', async (req, res) => {
   const { name, email, password, birthdate } = req.body;
+
+  console.log('📩 Nhận yêu cầu đăng ký:', req.body);
+
   try {
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
+      console.log('⚠️ Email đã tồn tại:', email);
       return res.status(400).json({ success: false, message: 'Email đã tồn tại' });
     }
+
     const newUser = new User({ name, email, password, birthdate });
-    await newUser.save();
-    res.json({ success: true });
+
+    await newUser.save()
+      .then(() => {
+        console.log('✅ Đăng ký thành công:', email);
+        res.json({ success: true });
+      })
+      .catch(err => {
+        console.error('❌ Lỗi khi lưu user:', err);
+        res.status(500).json({ success: false, message: 'Lỗi khi lưu user' });
+      });
+
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Lỗi server' });
+    console.error('❌ Lỗi xử lý đăng ký:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi đăng ký' });
   }
 });
 
-// ✅ API Đăng nhập
+
+// ✅ API Đăng nhập (không mã hóa)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email, password });
-    if (user) {
-      res.json({ success: true, name: user.name });
-    } else {
-      res.status(401).json({ success: false, message: 'Sai email hoặc mật khẩu' });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ thông tin' });
     }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Email không tồn tại' });
+    }
+
+    if (user.password !== password) {
+      return res.status(401).json({ success: false, message: 'Sai mật khẩu' });
+    }
+
+    res.json({ success: true, name: user.name });
+
   } catch (err) {
+    console.error('❌ Lỗi đăng nhập:', err);
     res.status(500).json({ success: false, message: 'Lỗi server' });
   }
 });
 
-// ✅ Khởi tạo Server & Socket.IO
+// ✅ Model Quiz (nếu chưa có)
+const Quiz = require('./models/Quiz');
+
+// ✅ API Lưu Quiz
+app.post('/api/quizzes', async (req, res) => {
+  const { title, createdBy, questions } = req.body;
+  try {
+    const quiz = new Quiz({ title, createdBy, questions });
+    await quiz.save();
+    res.json({ success: true, quizId: quiz._id });
+  } catch (err) {
+    console.error('❌ Lỗi lưu quiz:', err);
+    res.status(500).json({ success: false, message: 'Lỗi khi lưu quiz' });
+  }
+});
+
+// ✅ Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -79,26 +121,24 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
     credentials: true
   },
-  transports: ['websocket'], // ✅ Bắt buộc để tránh lỗi polling trên Render
-  allowEIO3: true // ✅ Đảm bảo hoạt động với phiên bản client cũ nếu có
+  transports: ['websocket'],
+  allowEIO3: true
 });
 
-
-// ✅ Rooms lưu trong RAM
 const rooms = {};
 
 io.on('connection', (socket) => {
-  console.log('🔌 Một client đã kết nối:', socket.id);
+  console.log('🔌 Client kết nối:', socket.id);
 
   socket.on('host-join', (pin) => {
-    console.log(`🟢 Host tạo phòng với mã PIN: ${pin}`);
+    console.log(`🟢 Host tạo phòng ${pin}`);
     socket.join(pin);
     if (!rooms[pin]) {
       rooms[pin] = {
         hostId: socket.id,
         players: [],
         questions: [],
-        currentQuestion: 0,
+        currentQuestion: 0
       };
     }
   });
@@ -160,7 +200,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('❌ Client ngắt kết nối:', socket.id);
+    console.log('❌ Client rời khỏi:', socket.id);
   });
 });
 
@@ -177,20 +217,7 @@ function sendQuestion(pin) {
   }
 }
 
-// ✅ API Lưu Quiz
-const Quiz = require('./models/Quiz');
-app.post('/api/quizzes', async (req, res) => {
-  const { title, createdBy, questions } = req.body;
-  try {
-    const quiz = new Quiz({ title, createdBy, questions });
-    await quiz.save();
-    res.json({ success: true, quizId: quiz._id });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Lỗi khi lưu quiz' });
-  }
-});
-
-// ✅ Lắng nghe cổng
+// ✅ Chạy server
 server.listen(3000, () => {
   console.log('🚀 Server chạy tại http://localhost:3000');
 });
