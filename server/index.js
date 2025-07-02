@@ -9,22 +9,20 @@ import authRoutes from './routes/authRoutes.js'
 dotenv.config()
 
 const app = express()
+const server = http.createServer(app)
 
-// ✅ Cấu hình CORS CHUẨN
-app.use(cors({
-  origin: [
-    'https://kahoot-4f1i.onrender.com',
-    'http://localhost:5173'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}))
-app.options('*', cors()) // Cho phép preflight request
+// ✅ Cho phép origin từ client Render
+const corsOptions = {
+  origin: 'https://kahoot-client.onrender.com',
+  credentials: true
+}
 
+// ✅ CORS cho REST API
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // ✅ Kết nối MongoDB
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
@@ -33,29 +31,19 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error('❌ MongoDB connection error:', err)
 })
 
-// ✅ Route API
+// ✅ Route
 app.use('/api', authRoutes)
-
-// ✅ Route kiểm tra
 app.get('/', (req, res) => {
   res.send('Kahoot backend is running!')
 })
 
-// ✅ Tạo server HTTP + socket.io
-const server = http.createServer(app)
+// ✅ Socket.io với CORS
 const io = new Server(server, {
-  cors: {
-    origin: [
-      'https://kahoot-4f1i.onrender.com',
-      'http://localhost:5173'
-    ],
-    methods: ['GET', 'POST']
-  }
+  cors: corsOptions
 })
 
-// ✅ Socket xử lý
 io.on('connection', (socket) => {
-  console.log('🟢 New socket connected:', socket.id)
+  console.log('🟢 Socket connected:', socket.id)
 
   socket.on('ping', () => {
     socket.emit('pong')
@@ -66,7 +54,6 @@ io.on('connection', (socket) => {
   })
 })
 
-// ✅ Khởi chạy server
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`)
