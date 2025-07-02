@@ -1,63 +1,64 @@
-const express = require('express');
-const http = require('http');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const { Server } = require('socket.io');
-require('dotenv').config();
+import express from 'express'
+import http from 'http'
+import cors from 'cors'
+import mongoose from 'mongoose'
+import { Server } from 'socket.io'
+import dotenv from 'dotenv'
+import authRoutes from './routes/authRoutes.js'
 
-const app = express();
+dotenv.config()
+
+const app = express()
 
 // Middleware
 app.use(cors({
-  origin: 'https://kahoot-4f1i.onrender.com', // Cho phép từ frontend Render
-  credentials: false // Vì bạn không cần cookie / session
-}));
-
-app.use(express.json());
+  origin: 'https://kahoot-4f1i.onrender.com',
+  credentials: false
+}))
+app.use(express.json())
 
 // Kết nối MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
-  console.log('✅ MongoDB connected');
+  console.log('✅ MongoDB connected')
 }).catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-});
+  console.error('❌ MongoDB connection error:', err)
+})
 
-// Tạo HTTP server
-const server = http.createServer(app);
+// Route đăng ký người dùng
+app.use('/api', authRoutes)
 
-// Tạo socket.io instance
+// Route test
+app.get('/', (req, res) => {
+  res.send('Kahoot backend is running!')
+})
+
+// Khởi tạo server và socket
+const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
     origin: 'https://kahoot-4f1i.onrender.com',
     methods: ['GET', 'POST'],
     credentials: false
   }
-});
+})
 
-// Gắn xử lý socket
 io.on('connection', (socket) => {
-  console.log('🟢 New socket connected:', socket.id);
+  console.log('🟢 New socket connected:', socket.id)
 
-  // Bắt sự kiện test
   socket.on('ping', () => {
-    socket.emit('pong');
-  });
+    socket.emit('pong')
+  })
 
   socket.on('disconnect', () => {
-    console.log('🔴 Socket disconnected:', socket.id);
-  });
-});
+    console.log('🔴 Socket disconnected:', socket.id)
+  })
+})
 
-// Các route API
-app.get('/', (req, res) => {
-  res.send('Kahoot backend is running!');
-});
-
-// Khởi động server
-const PORT = process.env.PORT || 5000;
+// Lắng nghe server
+const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-});
+  console.log(`🚀 Server is running on port ${PORT}`)
+})
