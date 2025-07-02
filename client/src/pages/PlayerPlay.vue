@@ -32,13 +32,17 @@ import socket from '../socket'
 const route = useRoute()
 const router = useRouter()
 const pin = route.params.pin
-const question = ref({ question: '', answers: [] })
 
+const question = ref({ question: '', answers: [] })
 const answerColors = ['btn-danger', 'btn-primary', 'btn-success', 'btn-warning']
 
 onMounted(() => {
   socket.on('receive-question', (q) => {
-    question.value = q
+    question.value = {
+      question: q.question,
+      answers: q.answers
+    }
+    console.log('📥 Nhận câu hỏi:', q)
   })
 
   socket.on('game-over', () => {
