@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 const answerSchema = new mongoose.Schema({
   roomPin: String,
@@ -8,6 +8,7 @@ const answerSchema = new mongoose.Schema({
   isCorrect: Boolean,
   timeTaken: Number, // nếu có
   createdAt: { type: Date, default: Date.now }
-});
+})
 
-module.exports = mongoose.model('Answer', answerSchema);
+const Answer = mongoose.model('Answer', answerSchema)
+export default Answer
