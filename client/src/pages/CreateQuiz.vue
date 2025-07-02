@@ -28,18 +28,12 @@
     </div>
 
     <div class="d-flex justify-content-between mt-4">
-  <div>
-    <button class="btn btn-outline-secondary me-2" @click="alert('Chức năng đang phát triển')">
-      📄 Nhập từ file Notepad
-    </button>
-    <button class="btn btn-secondary" @click="addQuestion">
-      ➕ Thêm câu hỏi
-    </button>
-  </div>
-  <button class="btn btn-success" @click="saveQuiz">
-    <i class="bi bi-cloud-arrow-up-fill me-1"></i>Lưu & Tạo phòng
-  </button>
-</div>
+      <div>
+        <button class="btn btn-outline-secondary me-2" @click="alert('Chức năng đang phát triển')">
+        📄 Nhập từ file Notepad
+      </button>
+      </div>
+    </div>
 
     <div class="d-flex justify-content-between mt-4">
       <button class="btn btn-secondary" @click="addQuestion">Thêm câu hỏi</button>

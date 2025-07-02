@@ -1,26 +1,20 @@
 <template>
   <div class="container mt-5 text-center">
-    <h2 class="mb-4 text-primary">🎯 Quản lý câu hỏi</h2>
-
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="list-group mb-4">
-          <button
-            v-for="(q, idx) in questions"
-            :key="idx"
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-            @click="sendQuestion(idx)"
-          >
-            <span class="text-start">{{ idx + 1 }}. {{ q.question }}</span>
-            <span class="badge bg-primary">Chiếu</span>
-          </button>
-        </div>
-
-        <button class="btn btn-danger mt-3" @click="endGame">
-          🔚 Kết thúc trò chơi
+    <h2 class="mb-4">📋 Danh sách câu hỏi</h2>
+    <ul class="list-group w-75 mx-auto">
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+        v-for="(q, idx) in questions"
+        :key="idx"
+      >
+        {{ idx + 1 }}. {{ q.question }}
+        <button class="btn btn-sm btn-primary" @click="sendQuestion(idx)">
+          ▶️ Chiếu câu này
         </button>
-      </div>
-    </div>
+      </li>
+    </ul>
+
+    <button class="btn btn-danger mt-4" @click="endGame">❌ Kết thúc trò chơi</button>
   </div>
 </template>
 
@@ -29,16 +23,16 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import socket from '../socket'
 
-const route = useRoute()
+const pin = useRoute().params.pin
 const router = useRouter()
-const pin = route.params.pin
 const questions = ref([])
 
 onMounted(() => {
+  socket.emit('host-join', pin) // Host đăng nhập
   socket.emit('get-questions', pin)
 
-  socket.on('question-list', (data) => {
-    questions.value = data
+  socket.on('question-list', (list) => {
+    questions.value = list
   })
 
   socket.on('game-over', () => {
@@ -47,10 +41,10 @@ onMounted(() => {
 })
 
 const sendQuestion = (index) => {
-  socket.emit('next-question', { pin, index })
+  socket.emit('admin-send-question', { pin, index })
 }
 
 const endGame = () => {
-  socket.emit('end-game', pin)
+  socket.emit('game-over', { pin })
 }
 </script>

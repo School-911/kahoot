@@ -22,7 +22,7 @@
       </table>
     </div>
 
-    <router-link to="/" class="btn btn-success mt-4">
+    <router-link to="/HomePage" class="btn btn-success mt-4">
       🔁 Chơi lại
     </router-link>
   </div>
