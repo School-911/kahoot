@@ -72,37 +72,42 @@ export function setupSocket(io) {
           }
         }
 
-        const r = roomQuestions[pin]
-
-        if (r.usedIndexes.length >= 10 || r.usedIndexes.length >= r.questions.length) {
-          io.to(pin).emit('game-over')
-          delete roomQuestions[pin]
-          return
-        }
-
-        let index
-        do {
-          index = Math.floor(Math.random() * r.questions.length)
-        } while (r.usedIndexes.includes(index))
-
-        r.usedIndexes.push(index)
-        const question = r.questions[index]
-
-        io.to(pin).emit('receive-question', {
-          question: question.question,
-          answers: question.answers
-        })
+        // Gửi câu hỏi đầu tiên
+        sendQuestion(pin, io)
       } catch (err) {
-        console.error('❌ Lỗi khi gửi câu hỏi:', err)
+        console.error('❌ Lỗi khi gửi câu hỏi đầu tiên:', err)
       }
     })
 
     socket.on('next-question', (pin) => {
-      io.to(pin).emit('send-question', { pin })
+      sendQuestion(pin, io)
     })
 
     socket.on('disconnect', () => {
       console.log('🔴 Socket disconnected:', socket.id)
     })
+  })
+}
+
+// Hàm gửi câu hỏi
+function sendQuestion(pin, io) {
+  const r = roomQuestions[pin]
+  if (!r || r.usedIndexes.length >= r.questions.length) {
+    io.to(pin).emit('game-over')
+    delete roomQuestions[pin]
+    return
+  }
+
+  let index
+  do {
+    index = Math.floor(Math.random() * r.questions.length)
+  } while (r.usedIndexes.includes(index))
+
+  r.usedIndexes.push(index)
+  const question = r.questions[index]
+
+  io.to(pin).emit('receive-question', {
+    question: question.question,
+    answers: question.answers
   })
 }
