@@ -16,21 +16,21 @@ export function setupSocket(io) {
     console.log('🟢 Socket connected:', socket.id)
 
     socket.on('answer-selected', ({ pin, answerIndex }) => {
-        const room = getRoom(pin)
-        if (!room) return
+      const room = getRoom(pin)
+      if (!room) return
 
-        const player = room.players.find(p => p.id === socket.id)
-        if (!player) return
+      const player = room.players.find(p => p.id === socket.id)
+      if (!player) return
 
-        const r = roomQuestions[pin]
-        if (!r || r.usedIndexes.length === 0) return
+      const r = roomQuestions[pin]
+      if (!r || r.usedIndexes.length === 0) return
 
-        const lastIndex = r.usedIndexes.at(-1)
-        const question = r.questions[lastIndex]
+      const lastIndex = r.usedIndexes.at(-1)
+      const question = r.questions[lastIndex]
 
-        if (answerIndex === question.correctIndex) {
-            player.score = (player.score || 0) + 1000 // Cộng 1000 điểm nếu đúng
-        }
+      if (answerIndex === question.correctIndex) {
+        player.score = (player.score || 0) + 1000 // Cộng 1000 điểm nếu đúng
+      }
     })
 
     socket.on('host-join', async (pin) => {
@@ -89,16 +89,23 @@ export function setupSocket(io) {
             questions: quiz.questions
           }
         }
-
-        // Gửi câu hỏi đầu tiên
-        sendQuestion(pin, io)
       } catch (err) {
         console.error('❌ Lỗi khi gửi câu hỏi đầu tiên:', err)
       }
     })
 
-    socket.on('next-question', (pin) => {
-      sendQuestion(pin, io)
+    socket.on('next-question', ({ pin, index }) => {
+      sendQuestion(pin, io, index)
+    })
+
+    socket.on('end-game', (pin) => {
+      const room = getRoom(pin)
+      if (room) {
+        io.to(pin).emit('game-over', {
+          players: room.players || []
+        })
+        delete roomQuestions[pin]
+      }
     })
 
     socket.on('disconnect', () => {
@@ -107,31 +114,23 @@ export function setupSocket(io) {
   })
 }
 
-// Hàm gửi câu hỏi
-function sendQuestion(pin, io) {
-    const r = roomQuestions[pin]
-    if (!r || r.usedIndexes.length >= r.questions.length) {
-    const room = getRoom(pin)
+function sendQuestion(pin, io, index = null) {
+  const r = roomQuestions[pin]
+  if (!r || r.questions.length === 0) return
 
-  // 🔥 Gửi điểm về cho tất cả client
-    io.to(pin).emit('game-over', {
-        players: room?.players || []
-    })
+  const room = getRoom(pin)
+  if (!room) return
 
-    delete roomQuestions[pin]
-    return
-    }
+  if (index === null || index >= r.questions.length) return
 
-    let index
-    do {
-        index = Math.floor(Math.random() * r.questions.length)
-    } while (r.usedIndexes.includes(index))
-
+  if (!r.usedIndexes.includes(index)) {
     r.usedIndexes.push(index)
-    const question = r.questions[index]
+  }
 
-    io.to(pin).emit('receive-question', {
-        question: question.question,
-        answers: question.answers
-    })
+  const question = r.questions[index]
+  io.to(pin).emit('receive-question', {
+    index,
+    question: question.question,
+    answers: question.answers
+  })
 }
