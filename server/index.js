@@ -9,7 +9,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://kahoot-ova0.onrender.com', // Cho phép từ frontend Render
+  origin: 'https://kahoot-4f1i.onrender.com', // Cho phép từ frontend Render
   credentials: false // Vì bạn không cần cookie / session
 }));
 
@@ -31,7 +31,7 @@ const server = http.createServer(app);
 // Tạo socket.io instance
 const io = new Server(server, {
   cors: {
-    origin: 'https://kahoot-ova0.onrender.com',
+    origin: 'https://kahoot-4f1i.onrender.com',
     methods: ['GET', 'POST'],
     credentials: false
   }
@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
 });
 
 // Khởi động server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
