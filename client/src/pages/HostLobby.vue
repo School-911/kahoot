@@ -3,7 +3,9 @@
     <h2>Mã PIN: {{ pin }}</h2>
     <p>Người chơi đã tham gia:</p>
     <ul class="list-group w-50 mx-auto">
-      <li class="list-group-item" v-for="(name, index) in players" :key="index">{{ name }}</li>
+      <li class="list-group-item" v-for="(player, index) in players" :key="index">
+        {{ player }}
+      </li>
     </ul>
     <button class="btn btn-primary mt-3" @click="startGame">Bắt đầu</button>
   </div>
@@ -20,8 +22,14 @@ const pin = route.params.pin
 const players = ref([])
 
 onMounted(() => {
+  socket.emit('get-players', pin) // Khi vào lobby, yêu cầu danh sách player
+
   socket.on('player-joined', name => {
     players.value.push(name)
+  })
+
+  socket.on('player-list', list => {
+    players.value = list.map(p => p.name)
   })
 })
 
