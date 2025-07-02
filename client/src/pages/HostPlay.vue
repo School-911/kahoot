@@ -1,21 +1,25 @@
 <template>
-  <div class="container mt-5">
-    <div class="card shadow p-4 text-center mx-auto" style="max-width: 600px;">
-      <h3 class="text-primary mb-4">📢 {{ currentQuestion.question }}</h3>
+  <div class="container mt-5 text-center">
+    <h2 class="mb-4 text-primary">🎯 Quản lý câu hỏi</h2>
 
-      <ul class="list-group text-start">
-        <li
-          v-for="(ans, idx) in currentQuestion.answers"
-          :key="idx"
-          class="list-group-item"
-        >
-          <strong>{{ idx + 1 }}.</strong> {{ ans }}
-        </li>
-      </ul>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="list-group mb-4">
+          <button
+            v-for="(q, idx) in questions"
+            :key="idx"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+            @click="sendQuestion(idx)"
+          >
+            <span class="text-start">{{ idx + 1 }}. {{ q.question }}</span>
+            <span class="badge bg-primary">Chiếu</span>
+          </button>
+        </div>
 
-      <button class="btn btn-primary mt-4 w-100" @click="nextQuestion">
-        ➡️ Câu tiếp theo
-      </button>
+        <button class="btn btn-danger mt-3" @click="endGame">
+          🔚 Kết thúc trò chơi
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -28,21 +32,25 @@ import socket from '../socket'
 const route = useRoute()
 const router = useRouter()
 const pin = route.params.pin
-const currentQuestion = ref({ question: '', answers: [] })
+const questions = ref([])
 
 onMounted(() => {
-  socket.emit('send-question', { pin })
+  socket.emit('get-questions', pin)
 
-  socket.on('receive-question', question => {
-    currentQuestion.value = question
+  socket.on('question-list', (data) => {
+    questions.value = data
   })
 
-  socket.on('game-results', () => {
+  socket.on('game-over', () => {
     router.push(`/host/${pin}/results`)
   })
 })
 
-const nextQuestion = () => {
-  socket.emit('next-question', pin)
+const sendQuestion = (index) => {
+  socket.emit('next-question', { pin, index })
+}
+
+const endGame = () => {
+  socket.emit('end-game', pin)
 }
 </script>
