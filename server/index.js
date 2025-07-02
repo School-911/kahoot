@@ -71,21 +71,31 @@ io.on('connection', (socket) => {
 
   // 👉 Người chơi tham gia game
   socket.on('join-game', ({ pin, name }) => {
-    console.log(`🧑 Người chơi ${name} tham gia phòng ${pin}`)
-    if (roomExists(pin)) {
-      const player = { id: socket.id, name, score: 0 }
-      addPlayerToRoom(pin, player)
-      socket.join(pin)
-      socket.emit('join-success')
-    } else {
-      socket.emit('join-failed')
-    }
-  })
+  if (roomExists(pin)) {
+    const player = { id: socket.id, name, score: 0 }
+    addPlayerToRoom(pin, player)
 
-  // Test ping
-  socket.on('ping', () => {
-    socket.emit('pong')
-  })
+    socket.join(pin)
+    socket.emit('join-success')
+
+    // Gửi tới host: có người chơi mới
+    io.to(pin).emit('player-joined', name)
+
+    console.log(`✅ Người chơi ${name} đã vào phòng ${pin}`)
+  } else {
+    socket.emit('join-failed')
+    console.log(`❌ Mã PIN không tồn tại: ${pin}`)
+  }
+})
+
+// 👇 Cho phép trang lobby hỏi danh sách người chơi
+socket.on('get-players', (pin) => {
+  const room = getRoom(pin)
+  if (room) {
+    io.to(socket.id).emit('player-list', room.players)
+  }
+})
+
 
   socket.on('disconnect', () => {
     console.log('🔴 Socket disconnected:', socket.id)
