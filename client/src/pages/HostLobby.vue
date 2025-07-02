@@ -11,7 +11,7 @@
           v-for="(player, index) in players"
           :key="index"
         >
-          <span>👤 {{ player }}</span>
+          <span>👤 {{ player.name }}</span>
         </li>
       </ul>
 
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import socket from '../socket'
 
@@ -35,13 +35,18 @@ const players = ref([])
 onMounted(() => {
   socket.emit('get-players', pin)
 
-  socket.on('player-joined', name => {
-    players.value.push(name)
+  socket.on('player-joined', (name) => {
+    players.value.push({ name })
   })
 
-  socket.on('player-list', list => {
-    players.value = list.map(p => p.name)
+  socket.on('player-list', (list) => {
+    players.value = list.map(p => ({ name: p.name }))
   })
+})
+
+onBeforeUnmount(() => {
+  socket.off('player-joined')
+  socket.off('player-list')
 })
 
 const startGame = () => {
