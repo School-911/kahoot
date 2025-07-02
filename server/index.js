@@ -25,7 +25,7 @@ const app = express()
 const server = http.createServer(app)
 
 const corsOptions = {
-  origin: 'https://kahoot-4f1i.onrender.com',
+  origin: 'https://kahoot-client.onrender.com',
   credentials: true
 }
 
