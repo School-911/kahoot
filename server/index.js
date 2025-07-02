@@ -22,6 +22,7 @@ import {
 
 // Model MongoDB
 import Room from './models/Room.js'
+import Quiz from './models/Quiz.js'
 
 dotenv.config()
 
@@ -46,13 +47,15 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error('❌ MongoDB connection error:', err)
 })
 
-// Routes
+// REST API Routes
 app.use('/api', authRoutes)
 app.use('/api', quizRoutes)
 app.use('/api', roomRoutes)
 app.get('/', (req, res) => res.send('Kahoot backend is running!'))
 
-// Socket.IO
+// ✅ RAM lưu chỉ số câu hỏi
+const roomMemory = {}
+
 const io = new Server(server, {
   cors: corsOptions
 })
@@ -60,19 +63,19 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('🟢 Socket connected:', socket.id)
 
-  // ✅ Host tạo phòng sau khi đã lưu room vào DB
+  // ✅ Host tạo phòng sau khi đã lưu DB
   socket.on('host-join', async (pin) => {
     console.log(`🎮 Host tạo phòng với mã PIN ${pin}`)
 
     const roomInDB = await Room.findOne({ pin })
 
     if (!roomInDB) {
-      console.log(`❌ Không tìm thấy room trong DB với mã pin ${pin}`)
+      console.log(`❌ Không tìm thấy room trong DB với pin ${pin}`)
       socket.emit('room-not-found')
       return
     }
 
-    createRoom(pin, socket.id)  // tạo room RAM cho socket
+    createRoom(pin, socket.id)
     socket.join(pin)
     console.log(`✅ Room RAM tạo thành công cho mã pin ${pin}`)
   })
@@ -91,8 +94,6 @@ io.on('connection', (socket) => {
 
       socket.join(pin)
       socket.emit('join-success')
-
-      // Thông báo đến host: có người chơi mới
       io.to(pin).emit('player-joined', name)
       console.log(`✅ Người chơi ${name} đã vào phòng ${pin}`)
     } else {
@@ -101,7 +102,7 @@ io.on('connection', (socket) => {
     }
   })
 
-  // ✅ Cho trang lobby lấy danh sách người chơi
+  // ✅ Lấy danh sách người chơi (trang lobby)
   socket.on('get-players', (pin) => {
     const room = getRoom(pin)
     if (room) {
@@ -109,10 +110,57 @@ io.on('connection', (socket) => {
     }
   })
 
-  // ✅ Dọn dẹp khi disconnect
+  // ✅ Gửi câu hỏi đầu tiên
+  socket.on('send-question', async ({ pin }) => {
+    try {
+      const room = await Room.findOne({ pin })
+      if (!room) return
+
+      const quiz = await Quiz.findById(room.quizId)
+      if (!quiz) return
+
+      if (!roomMemory[pin]) {
+        roomMemory[pin] = { index: 0 }
+      }
+
+      const index = roomMemory[pin].index
+      const question = quiz.questions[index]
+
+      if (question) {
+        socket.emit('receive-question', question)
+        console.log(`📨 Gửi câu hỏi ${index + 1} cho phòng ${pin}`)
+      } else {
+        socket.emit('game-results')
+        console.log(`🏁 Hết câu hỏi, gửi game-results`)
+      }
+    } catch (err) {
+      console.error('❌ Lỗi khi gửi câu hỏi:', err)
+    }
+  })
+
+  // ✅ Chuyển sang câu tiếp theo
+  socket.on('next-question', async (pin) => {
+    if (!roomMemory[pin]) return
+    roomMemory[pin].index++
+
+    const room = await Room.findOne({ pin })
+    const quiz = await Quiz.findById(room.quizId)
+    const index = roomMemory[pin].index
+
+    if (quiz && index < quiz.questions.length) {
+      const next = quiz.questions[index]
+      io.to(pin).emit('receive-question', next)
+      console.log(`➡️ Gửi câu tiếp theo ${index + 1}`)
+    } else {
+      io.to(pin).emit('game-results')
+      console.log(`🏁 Kết thúc game cho phòng ${pin}`)
+    }
+  })
+
+  // ✅ Socket disconnect
   socket.on('disconnect', () => {
     console.log('🔴 Socket disconnected:', socket.id)
-    // Có thể thêm logic xóa player khỏi room tại đây
+    // Có thể thêm xoá player ở đây nếu cần
   })
 })
 
