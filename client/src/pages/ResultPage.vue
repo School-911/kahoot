@@ -1,11 +1,30 @@
 <template>
-  <div class="container text-center mt-5">
-    <h2>Kết quả trò chơi</h2>
-    <ul class="list-group w-50 mx-auto">
-      <li class="list-group-item" v-for="(p, idx) in players" :key="idx">
-        {{ p.name }} - {{ p.score }} điểm
-      </li>
-    </ul>
+  <div class="container mt-5 text-center">
+    <h2 class="fw-bold text-dark mb-4">🎉 Trò chơi kết thúc!</h2>
+    <h4 class="text-secondary mb-4">📊 Kết quả người chơi</h4>
+
+    <div class="table-responsive">
+      <table class="table table-bordered shadow-sm rounded bg-white w-75 mx-auto">
+        <thead class="table-light">
+          <tr class="text-center">
+            <th>#</th>
+            <th>Tên</th>
+            <th>Điểm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(player, index) in players" :key="index" class="text-center">
+            <td class="fw-bold">{{ index + 1 }}</td>
+            <td>{{ player.name }}</td>
+            <td>{{ player.score }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <router-link to="/" class="btn btn-success mt-4">
+      🔁 Chơi lại
+    </router-link>
   </div>
 </template>
 
@@ -17,7 +36,8 @@ const players = ref([])
 
 onMounted(() => {
   socket.on('game-results', (data) => {
-    players.value = data
+    // Sắp xếp theo điểm cao nhất
+    players.value = [...data].sort((a, b) => b.score - a.score)
   })
 })
 </script>

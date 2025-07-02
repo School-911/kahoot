@@ -1,12 +1,22 @@
 <template>
-  <div class="text-center mt-5">
-    <h2>{{ currentQuestion.question }}</h2>
-    <ul class="list-group w-50 mx-auto">
-      <li class="list-group-item" v-for="(ans, idx) in currentQuestion.answers" :key="idx">
-        {{ ans }}
-      </li>
-    </ul>
-    <button class="btn btn-secondary mt-3" @click="nextQuestion">Câu tiếp theo</button>
+  <div class="container mt-5">
+    <div class="card shadow p-4 text-center mx-auto" style="max-width: 600px;">
+      <h3 class="text-primary mb-4">📢 {{ currentQuestion.question }}</h3>
+
+      <ul class="list-group text-start">
+        <li
+          v-for="(ans, idx) in currentQuestion.answers"
+          :key="idx"
+          class="list-group-item"
+        >
+          <strong>{{ idx + 1 }}.</strong> {{ ans }}
+        </li>
+      </ul>
+
+      <button class="btn btn-primary mt-4 w-100" @click="nextQuestion">
+        ➡️ Câu tiếp theo
+      </button>
+    </div>
   </div>
 </template>
 

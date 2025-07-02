@@ -1,23 +1,25 @@
 <template>
   <div>
     <!-- Navbar -->
-    <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light px-3">
-      <a class="navbar-brand" href="#">🎯 Kahoot Clone</a>
-      <div class="ml-auto">
-        👤 {{ user.name }}
-        <button class="btn btn-sm btn-outline-danger ml-2" @click="logoutUser">Đăng xuất</button>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-2">
+      <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a class="navbar-brand fw-bold text-primary fs-4" href="#">🎯 Kahoot Clone</a>
+
+        <div class="d-flex align-items-center">
+          <template v-if="isLoggedIn">
+            <span class="me-3">👤 <strong>{{ user.name }}</strong></span>
+            <button class="btn btn-outline-danger btn-sm" @click="logoutUser">Đăng xuất</button>
+          </template>
+
+          <template v-else>
+            <router-link to="/login" class="btn btn-outline-primary btn-sm me-2">Đăng nhập</router-link>
+            <router-link to="/register" class="btn btn-outline-success btn-sm">Đăng ký</router-link>
+          </template>
+        </div>
       </div>
     </nav>
 
-    <!-- Nếu chưa đăng nhập, hiện login/register -->
-    <nav v-else class="navbar navbar-expand-lg navbar-light bg-light px-3">
-      <a class="navbar-brand" href="#">🎯 Kahoot Clone</a>
-      <div class="ml-auto">
-        <router-link to="/login" class="btn btn-sm btn-outline-primary mx-1">Đăng nhập</router-link>
-        <router-link to="/register" class="btn btn-sm btn-outline-success mx-1">Đăng ký</router-link>
-      </div>
-    </nav>
-
+    <!-- Nội dung -->
     <router-view />
   </div>
 </template>
@@ -52,6 +54,7 @@ const logoutUser = () => {
 <style>
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background-color: #f8f9fa;
 }
 </style>

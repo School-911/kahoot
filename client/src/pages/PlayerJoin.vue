@@ -1,9 +1,26 @@
 <template>
   <div class="container mt-5">
-    <h2>Tham gia trò chơi</h2>
-    <input v-model="pin" class="form-control mb-2" placeholder="Mã PIN" />
-    <input v-model="name" class="form-control mb-2" placeholder="Tên của bạn" />
-    <button class="btn btn-success" @click="joinGame">Tham gia</button>
+    <div class="card shadow p-4 mx-auto" style="max-width: 500px;">
+      <h3 class="text-center text-success mb-4">🎮 Tham gia trò chơi</h3>
+
+      <input
+        v-model="pin"
+        type="text"
+        class="form-control mb-3"
+        placeholder="🔢 Nhập mã PIN"
+      />
+
+      <input
+        v-model="name"
+        type="text"
+        class="form-control mb-4"
+        placeholder="🧑 Nhập tên của bạn"
+      />
+
+      <button class="btn btn-success w-100" @click="joinGame">
+        ✅ Tham gia
+      </button>
+    </div>
   </div>
 </template>
 
@@ -16,11 +33,10 @@ const pin = ref('')
 const name = ref('')
 const router = useRouter()
 
-// Đăng ký các socket listener một lần
 onMounted(() => {
   socket.on('join-success', () => {
     console.log('✅ Tham gia thành công, chuyển đến phòng chờ...')
-    router.push(`/lobby/${pin.value}`) // 👉 chuyển đến trang lobby
+    router.push(`/lobby/${pin.value}`)
   })
 
   socket.on('join-failed', () => {
@@ -28,7 +44,6 @@ onMounted(() => {
   })
 })
 
-// Dọn dẹp khi rời trang
 onBeforeUnmount(() => {
   socket.off('join-success')
   socket.off('join-failed')
@@ -36,7 +51,7 @@ onBeforeUnmount(() => {
 
 const joinGame = () => {
   if (!pin.value || !name.value) {
-    alert('Vui lòng nhập đầy đủ mã PIN và tên!')
+    alert('⚠️ Vui lòng nhập đầy đủ mã PIN và tên!')
     return
   }
 

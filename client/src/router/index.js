@@ -10,19 +10,28 @@ import ResultPage from '../pages/ResultPage.vue'
 import Login from '../components/Login.vue'
 import Register from '../components/Register.vue'
 import Auth from '../pages/Auth.vue'
+import PlayerPlay from '../pages/PlayerPlay.vue'
+import ketqua from '../pages/ketqua.vue'
 
 const routes = [
-  { path: '/', redirect: '/auth' },              // ✅ Mặc định chuyển đến /auth
-  { path: '/auth', component: Auth },            // Trang chứa nút đăng nhập / đăng ký
+  { path: '/', redirect: '/auth' }, // Trang mặc định
+  { path: '/auth', component: Auth },
   { path: '/login', component: Login },
   { path: '/register', component: Register },
-  { path: '/home', component: HomePage },        // ✅ Trang chính sau khi đăng nhập
+  { path: '/home', component: HomePage },
   { path: '/create', component: CreateQuiz },
   { path: '/join', component: PlayerJoin },
+
+  // Host flow
   { path: '/host/:pin', component: HostLobby },
   { path: '/host/:pin/play', component: HostPlay },
   { path: '/host/:pin/results', component: ResultPage },
-  { path: '/player/:pin', component: PlayerScreen }
+
+  // Player flow
+  { path: '/player/:pin/lobby', component: PlayerScreen },
+  { path: '/player/:pin/play', component: PlayerPlay },
+  { path: '/player/:pin/results', component: ketqua },
+
 ]
 
 const router = createRouter({

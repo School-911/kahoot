@@ -1,20 +1,24 @@
 <template>
   <div class="container text-center mt-5">
-    <h2 class="mb-4">{{ question.question }}</h2>
+    <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
+      <h3 class="fw-bold text-dark mb-4">
+        {{ question.question || '⏳ Chờ câu hỏi...' }}
+      </h3>
 
-    <div class="row">
-      <div
-        class="col-6 mb-3"
-        v-for="(ans, index) in question.answers"
-        :key="index"
-      >
-        <button
-          class="btn w-100 py-3 fw-bold"
-          :class="answerColors[index % answerColors.length]"
-          @click="selectAnswer(index)"
+      <div class="row">
+        <div
+          class="col-6 mb-3"
+          v-for="(ans, index) in question.answers"
+          :key="index"
         >
-          {{ ans }}
-        </button>
+          <button
+            class="btn w-100 py-3 fw-bold text-white"
+            :class="answerColors[index % answerColors.length]"
+            @click="selectAnswer(index)"
+          >
+            {{ ans }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -30,15 +34,14 @@ const router = useRouter()
 const pin = route.params.pin
 const question = ref({ question: '', answers: [] })
 
+// Màu Bootstrap cho các nút trả lời
 const answerColors = ['btn-danger', 'btn-primary', 'btn-success', 'btn-warning']
 
-// Nhận câu hỏi từ server
 onMounted(() => {
   socket.on('receive-question', (q) => {
     question.value = q
   })
 
-  // Nếu trò chơi kết thúc
   socket.on('game-over', () => {
     router.push(`/player/${pin}/results`)
   })
