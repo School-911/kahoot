@@ -1,8 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 const roomSchema = new mongoose.Schema({
   pin: String,
-  quizId: mongoose.Types.ObjectId,
+  quizId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quiz'
+  },
   hostName: String,
   players: [
     {
@@ -11,6 +14,7 @@ const roomSchema = new mongoose.Schema({
     }
   ],
   createdAt: { type: Date, default: Date.now }
-});
+})
 
-module.exports = mongoose.model('Room', roomSchema);
+const Room = mongoose.model('Room', roomSchema)
+export default Room

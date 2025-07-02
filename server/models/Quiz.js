@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 const quizSchema = new mongoose.Schema({
   title: String,
-  createdBy: String, // tên hoặc id người tạo (simple)
+  createdBy: String,
   createdAt: { type: Date, default: Date.now },
   questions: [
     {
@@ -11,6 +11,7 @@ const quizSchema = new mongoose.Schema({
       correctIndex: Number
     }
   ]
-});
+})
 
-module.exports = mongoose.model('Quiz', quizSchema);
+const Quiz = mongoose.model('Quiz', quizSchema)
+export default Quiz
