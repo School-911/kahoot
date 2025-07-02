@@ -51,7 +51,7 @@ const saveQuiz = async () => {
 
   try {
     // 1. Lưu quiz vào MongoDB
-    const res = await axios.post('http://localhost:3000/api/quizzes', {
+    const res = await axios.post(`${import.meta.env.VITE_API}/api/quizzes`, {
       title,
       createdBy,
       questions: questions.value
@@ -60,7 +60,7 @@ const saveQuiz = async () => {
     const quizId = res.data.quizId
 
     // 2. Tạo room trên MongoDB (dùng pin, quizId, host)
-    await axios.post('http://localhost:3000/api/rooms', {
+    await axios.post(`${import.meta.env.VITE_API}/api/rooms`, {
       pin,
       quizId,
       hostName: createdBy
