@@ -5,6 +5,8 @@ import mongoose from 'mongoose'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
 import authRoutes from './routes/authRoutes.js'
+import quizRoutes from './routes/quizRoutes.js'
+import roomRoutes from './routes/roomRoutes.js'
 
 dotenv.config()
 
@@ -16,6 +18,9 @@ const corsOptions = {
   origin: 'https://kahoot-client.onrender.com',
   credentials: true
 }
+
+app.use('/api', quizRoutes)
+app.use('/api', roomRoutes)
 
 // ✅ CORS cho REST API
 app.use(cors(corsOptions))

@@ -1,20 +1,13 @@
-// server/controllers/roomController.js
-import {
-  createRoom,
-  getRoom,
-  addPlayerToRoom,
-  startGame
-} from '../models/room.js'
+import Room from '../models/Room.js'
 
-export function handleJoinRoom(io, socket, { roomId, player }) {
-  const room = addPlayerToRoom(roomId, player)
-  socket.join(roomId)
-  io.to(roomId).emit('room-updated', room)
-}
-
-export function handleStartGame(io, socket, { roomId }) {
-  const room = startGame(roomId)
-  if (room) {
-    io.to(roomId).emit('game-started')
+export const createRoom = async (req, res) => {
+  try {
+    const { pin, quizId, hostName } = req.body
+    const room = new Room({ pin, quizId, hostName })
+    await room.save()
+    res.status(201).json({ message: 'Room created', roomId: room._id })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Lỗi khi tạo phòng' })
   }
 }
