@@ -15,6 +15,38 @@ export function setupSocket(io) {
   io.on('connection', (socket) => {
     console.log('🟢 Socket connected:', socket.id)
 
+    socket.on('host-join', async (pin) => {
+      const roomInDB = await Room.findOne({ pin })
+      if (!roomInDB) return socket.emit('room-not-found')
+
+      createRoom(pin, socket.id)
+      socket.join(pin)
+      console.log(`🎮 Host đã tạo room ${pin}`)
+
+      // Load quiz questions từ DB
+      const quiz = await Quiz.findById(roomInDB.quizId)
+      if (quiz) {
+        roomQuestions[pin] = {
+          usedIndexes: [],
+          questions: quiz.questions
+        }
+
+        io.to(socket.id).emit('question-list', quiz.questions) // Gửi danh sách cho admin
+      }
+    })
+
+    socket.on('get-questions', (pin) => {
+      const r = roomQuestions[pin]
+      if (r) {
+        io.to(socket.id).emit('question-list', r.questions)
+      }
+    })
+
+    socket.on('admin-send-question', ({ pin, index }) => {
+      console.log(`📢 Admin chọn chiếu câu số ${index} trong phòng ${pin}`)
+      sendQuestionByIndex(pin, index, io)
+    })
+
     socket.on('answer-selected', ({ pin, answerIndex }) => {
       const room = getRoom(pin)
       if (!room) return
@@ -23,42 +55,24 @@ export function setupSocket(io) {
       if (!player) return
 
       const r = roomQuestions[pin]
-      if (!r || r.usedIndexes.length === 0) return
+      if (!r) return
 
       const lastIndex = r.usedIndexes.at(-1)
       const question = r.questions[lastIndex]
+      if (!question) return
 
       if (answerIndex === question.correctIndex) {
-        player.score = (player.score || 0) + 1000 // Cộng 1000 điểm nếu đúng
+        player.score = (player.score || 0) + 1000
       }
-    })
-
-    socket.on('host-join', async (pin) => {
-      const roomInDB = await Room.findOne({ pin })
-      if (!roomInDB) {
-        socket.emit('room-not-found')
-        return
-      }
-
-      createRoom(pin, socket.id)
-      socket.join(pin)
-      console.log(`🎮 Host đã tạo room ${pin}`)
-    })
-
-    socket.on('add-questions', ({ pin, questions }) => {
-      addQuestionsToRoom(pin, questions)
-      console.log(`📚 Đã lưu câu hỏi cho phòng ${pin}`)
     })
 
     socket.on('join-game', ({ pin, name }) => {
       if (roomExists(pin)) {
         const player = { id: socket.id, name, score: 0 }
         addPlayerToRoom(pin, player)
-
         socket.join(pin)
         socket.emit('join-success')
         io.to(pin).emit('player-joined', name)
-
         console.log(`✅ Người chơi ${name} đã tham gia phòng ${pin}`)
       } else {
         socket.emit('join-failed')
@@ -73,39 +87,12 @@ export function setupSocket(io) {
       }
     })
 
-    socket.on('send-question', async ({ pin }) => {
-      try {
-        if (!roomQuestions[pin]) {
-          const room = await Room.findOne({ pin })
-          if (!room) return socket.emit('room-not-found')
-
-          const quiz = await Quiz.findById(room.quizId)
-          if (!quiz || quiz.questions.length === 0) {
-            return socket.emit('no-questions')
-          }
-
-          roomQuestions[pin] = {
-            usedIndexes: [],
-            questions: quiz.questions
-          }
-        }
-      } catch (err) {
-        console.error('❌ Lỗi khi gửi câu hỏi đầu tiên:', err)
-      }
-    })
-
-    socket.on('next-question', ({ pin, index }) => {
-      sendQuestion(pin, io, index)
-    })
-
-    socket.on('end-game', (pin) => {
+    socket.on('game-over', ({ pin }) => {
       const room = getRoom(pin)
-      if (room) {
-        io.to(pin).emit('game-over', {
-          players: room.players || []
-        })
-        delete roomQuestions[pin]
-      }
+      io.to(pin).emit('game-over', {
+        players: room?.players || []
+      })
+      delete roomQuestions[pin]
     })
 
     socket.on('disconnect', () => {
@@ -114,22 +101,15 @@ export function setupSocket(io) {
   })
 }
 
-function sendQuestion(pin, io, index = null) {
+// Gửi câu hỏi theo chỉ số cụ thể
+function sendQuestionByIndex(pin, index, io) {
   const r = roomQuestions[pin]
-  if (!r || r.questions.length === 0) return
+  if (!r || !r.questions[index]) return
 
-  const room = getRoom(pin)
-  if (!room) return
-
-  if (index === null || index >= r.questions.length) return
-
-  if (!r.usedIndexes.includes(index)) {
-    r.usedIndexes.push(index)
-  }
-
+  r.usedIndexes.push(index)
   const question = r.questions[index]
+
   io.to(pin).emit('receive-question', {
-    index,
     question: question.question,
     answers: question.answers
   })
