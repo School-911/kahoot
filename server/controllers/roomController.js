@@ -1,5 +1,7 @@
 import Room from '../models/Room.js'
+import Quiz from '../models/Quiz.js'
 
+// ✅ Tạo phòng
 export const createRoom = async (req, res) => {
   try {
     const { pin, quizId, hostName } = req.body
@@ -13,5 +15,27 @@ export const createRoom = async (req, res) => {
   } catch (err) {
     console.error('❌ Lỗi tạo phòng:', err)
     res.status(500).json({ message: 'Lỗi khi tạo phòng' })
+  }
+}
+
+// ✅ Lấy quiz theo mã PIN phòng
+export const getQuizByPin = async (req, res) => {
+  try {
+    const { pin } = req.params
+
+    const room = await Room.findOne({ pin })
+    if (!room) {
+      return res.status(404).json({ message: 'Không tìm thấy phòng' })
+    }
+
+    const quiz = await Quiz.findById(room.quizId)
+    if (!quiz) {
+      return res.status(404).json({ message: 'Không tìm thấy quiz' })
+    }
+
+    res.json(quiz)
+  } catch (err) {
+    console.error('❌ Lỗi lấy quiz theo PIN:', err)
+    res.status(500).json({ message: 'Lỗi server' })
   }
 }

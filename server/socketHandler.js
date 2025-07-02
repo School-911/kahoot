@@ -15,6 +15,24 @@ export function setupSocket(io) {
   io.on('connection', (socket) => {
     console.log('🟢 Socket connected:', socket.id)
 
+    socket.on('answer-selected', ({ pin, answerIndex }) => {
+        const room = getRoom(pin)
+        if (!room) return
+
+        const player = room.players.find(p => p.id === socket.id)
+        if (!player) return
+
+        const r = roomQuestions[pin]
+        if (!r || r.usedIndexes.length === 0) return
+
+        const lastIndex = r.usedIndexes.at(-1)
+        const question = r.questions[lastIndex]
+
+        if (answerIndex === question.correctIndex) {
+            player.score = (player.score || 0) + 1000 // Cộng 1000 điểm nếu đúng
+        }
+    })
+
     socket.on('host-join', async (pin) => {
       const roomInDB = await Room.findOne({ pin })
       if (!roomInDB) {
@@ -91,23 +109,29 @@ export function setupSocket(io) {
 
 // Hàm gửi câu hỏi
 function sendQuestion(pin, io) {
-  const r = roomQuestions[pin]
-  if (!r || r.usedIndexes.length >= r.questions.length) {
-    io.to(pin).emit('game-over')
+    const r = roomQuestions[pin]
+    if (!r || r.usedIndexes.length >= r.questions.length) {
+    const room = getRoom(pin)
+
+  // 🔥 Gửi điểm về cho tất cả client
+    io.to(pin).emit('game-over', {
+        players: room?.players || []
+    })
+
     delete roomQuestions[pin]
     return
-  }
+    }
 
-  let index
-  do {
-    index = Math.floor(Math.random() * r.questions.length)
-  } while (r.usedIndexes.includes(index))
+    let index
+    do {
+        index = Math.floor(Math.random() * r.questions.length)
+    } while (r.usedIndexes.includes(index))
 
-  r.usedIndexes.push(index)
-  const question = r.questions[index]
+    r.usedIndexes.push(index)
+    const question = r.questions[index]
 
-  io.to(pin).emit('receive-question', {
-    question: question.question,
-    answers: question.answers
-  })
+    io.to(pin).emit('receive-question', {
+        question: question.question,
+        answers: question.answers
+    })
 }

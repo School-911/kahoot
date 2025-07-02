@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "kahoot-backend",
   "version": "1.0.0",
   "description": "Kahoot Clone backend with Node.js + Socket.IO",

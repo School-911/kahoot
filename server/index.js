@@ -5,13 +5,15 @@ import cors from 'cors'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { Server } from 'socket.io'
+import path from 'path'
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Routes
 import authRoutes from './routes/authRoutes.js'
 import quizRoutes from './routes/quizRoutes.js'
 import roomRoutes from './routes/roomRoutes.js'
-
-// 👇 THÊM dòng này
 import { setupSocket } from './socketHandler.js'
 
 dotenv.config()
@@ -42,6 +44,14 @@ app.get('/', (req, res) => res.send('Kahoot backend is running!'))
 // 👇 Khởi tạo socket.io & gọi file tách riêng
 const io = new Server(server, { cors: corsOptions })
 setupSocket(io)
+
+// Serve static files (đường dẫn tới thư mục build của Vue)
+app.use(express.static(path.join(__dirname, 'client/dist')))
+
+// ❗ Tất cả các route khác (không phải /api) → trả về index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist', 'index.html'))
+})
 
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
