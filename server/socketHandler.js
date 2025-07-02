@@ -1,34 +1,33 @@
+// ✅ socketHandler.js
 import { Server } from 'socket.io'
 import Room from './models/Room.js'
 import Quiz from './models/Quiz.js'
 import Answer from './models/Answer.js'
+
 import {
   createRoom,
   roomExists,
   addPlayerToRoom,
   addQuestionsToRoom,
   getRoom,
-  getPlayersInRoom
+  getPlayersInRoom,
+  setCurrentQuestionIndex,
+  resetRoom
 } from './roomManager.js'
 
-const roomData = {} // Lưu câu hỏi đã load từ DB
+const roomData = {}
 
 export function setupSocket(io) {
   io.on('connection', (socket) => {
     console.log('🟢 Socket connected:', socket.id)
 
-    // ✅ Host tạo phòng
     socket.on('host-join', async (pin) => {
       const room = await Room.findOne({ pin })
-      if (!room) {
-        socket.emit('room-not-found')
-        return
-      }
+      if (!room) return socket.emit('room-not-found')
 
       createRoom(pin, socket.id)
       socket.join(pin)
 
-      // Lấy quiz từ DB
       const quiz = await Quiz.findById(room.quizId)
       if (!quiz) return
 
@@ -40,40 +39,29 @@ export function setupSocket(io) {
       console.log(`🎮 Host đã tạo room ${pin}`)
     })
 
-    // ✅ Người chơi tham gia
     socket.on('join-game', ({ pin, name }) => {
-      if (!roomExists(pin)) {
-        socket.emit('join-failed')
-        return
-      }
+      if (!roomExists(pin)) return socket.emit('join-failed')
 
       const player = { id: socket.id, name, score: 0 }
       addPlayerToRoom(pin, player)
 
       socket.join(pin)
       socket.emit('join-success')
-      io.to(pin).emit('player-joined', name)
     })
 
-    // ✅ Host gửi danh sách câu hỏi
-    socket.on('add-questions', ({ pin, questions }) => {
-      addQuestionsToRoom(pin, questions)
-    })
-
-    // ✅ Host yêu cầu gửi danh sách câu hỏi
     socket.on('get-questions', (pin) => {
       const data = roomData[pin]
       if (data) {
-        io.to(socket.id).emit('question-list', data.questions)
+        socket.emit('question-list', data.questions)
       }
     })
 
-    // ✅ Host chọn câu hỏi để chiếu
     socket.on('select-question', ({ pin, index }) => {
       const data = roomData[pin]
       if (!data || !data.questions[index]) return
 
       data.currentIndex = index
+      setCurrentQuestionIndex(pin, index)
 
       const question = data.questions[index]
       io.to(pin).emit('receive-question', {
@@ -82,16 +70,13 @@ export function setupSocket(io) {
         index
       })
 
-      console.log(`📤 Câu hỏi ${index + 1} đã được chiếu tới phòng ${pin}`)
+      console.log(`📤 Đã chiếu câu ${index + 1} cho phòng ${pin}`)
     })
 
-    // ✅ Người chơi gửi câu trả lời
     socket.on('answer-selected', async ({ pin, answerIndex }) => {
       const room = getRoom(pin)
-      if (!room) return
-
       const data = roomData[pin]
-      if (!data) return
+      if (!room || !data) return
 
       const question = data.questions[data.currentIndex]
       const isCorrect = answerIndex === question.correctIndex
@@ -116,11 +101,12 @@ export function setupSocket(io) {
       }
     })
 
-    // ✅ Kết thúc game
     socket.on('end-game', (pin) => {
-      const players = getRoom(pin)?.players || []
+      const players = getPlayersInRoom(pin)
       io.to(pin).emit('game-over', { players })
+
       delete roomData[pin]
+      resetRoom(pin)
     })
 
     socket.on('disconnect', () => {

@@ -1,4 +1,4 @@
-// roomManager.js ✅ chuẩn ESM
+// ✅ roomManager.js
 const rooms = {}
 
 function createRoom(pin, hostSocketId) {
@@ -40,9 +40,9 @@ function getCurrentQuestion(pin) {
   return room.questions[room.currentQuestionIndex]
 }
 
-function nextQuestion(pin) {
+function setCurrentQuestionIndex(pin, index) {
   if (rooms[pin]) {
-    rooms[pin].currentQuestionIndex++
+    rooms[pin].currentQuestionIndex = index
   }
 }
 
@@ -50,7 +50,6 @@ function resetRoom(pin) {
   delete rooms[pin]
 }
 
-// ✅ Xuất theo chuẩn ES Module
 export {
   createRoom,
   roomExists,
@@ -59,6 +58,6 @@ export {
   getRoom,
   addQuestionsToRoom,
   getCurrentQuestion,
-  nextQuestion,
+  setCurrentQuestionIndex,
   resetRoom
 }
