@@ -114,14 +114,19 @@ io.on('connection', (socket) => {
 
   // 👉 Chuyển sang câu hỏi tiếp theo
   socket.on('next-question', (pin) => {
+  const room = getRoom(pin)
+  if (!room) return
+
+  // 👉 Tăng index nếu còn câu hỏi
+  if (room.currentQuestionIndex < room.questions.length - 1) {
     nextQuestion(pin)
     const question = getCurrentQuestion(pin)
-    if (question) {
-      io.to(pin).emit('receive-question', question)
-    } else {
-      io.to(pin).emit('game-results') // hết câu hỏi
-    }
-  })
+    io.to(pin).emit('receive-question', question)
+  } else {
+    // 👉 Hết câu hỏi
+    io.to(pin).emit('game-results')
+  }
+})
 
   // 👉 Lấy danh sách người chơi (cho lobby)
   socket.on('get-players', (pin) => {
