@@ -1,12 +1,37 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-screen">
-    <h1 class="text-3xl font-bold mb-6">Đăng nhập</h1>
-    <form @submit.prevent="handleLogin" class="w-80 space-y-4">
-      <input v-model="email" type="email" placeholder="Email" class="w-full p-2 border rounded" required />
-      <input v-model="password" type="password" placeholder="Mật khẩu" class="w-full p-2 border rounded" required />
-      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded">Đăng nhập</button>
-    </form>
-    <p class="mt-4">Chưa có tài khoản? <router-link to="/register" class="text-blue-500">Đăng ký</router-link></p>
+  <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow p-4" style="width: 350px;">
+      <h3 class="text-center mb-4 text-primary">🔐 Đăng nhập</h3>
+
+      <form @submit.prevent="handleLogin">
+        <div class="mb-3">
+          <input
+            v-model="email"
+            type="email"
+            class="form-control"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <input
+            v-model="password"
+            type="password"
+            class="form-control"
+            placeholder="Mật khẩu"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+      </form>
+
+      <p class="text-center mt-3 mb-0">
+        Chưa có tài khoản?
+        <router-link to="/register" class="text-decoration-none text-success">
+          Đăng ký
+        </router-link>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -14,7 +39,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { user } from '../stores/auth' // Nếu bạn có store để lưu user toàn cục
+import { user } from '../stores/auth'
 
 const email = ref('')
 const password = ref('')
@@ -29,14 +54,9 @@ const handleLogin = async () => {
 
     if (response.data.success) {
       alert('Đăng nhập thành công!')
-
-      // ✅ Lưu user vào localStorage và store (nếu có)
-      const userData = {
-        name: response.data.name || 'Người dùng'
-      }
+      const userData = { name: response.data.name || 'Người dùng' }
       localStorage.setItem('user', JSON.stringify(userData))
-      user.value = userData  // Nếu bạn dùng Pinia hoặc store đơn giản
-
+      user.value = userData
       router.push('/home')
     } else {
       alert('Sai email hoặc mật khẩu')
@@ -47,10 +67,3 @@ const handleLogin = async () => {
   }
 }
 </script>
-
-<style scoped>
-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-</style>
