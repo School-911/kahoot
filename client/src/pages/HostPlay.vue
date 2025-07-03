@@ -30,6 +30,9 @@ const pin = route.params.pin
 const questions = ref([])
 
 onMounted(() => {
+  // ✅ Bắt buộc phải join lại phòng
+  socket.emit('host-join', pin)
+
   socket.emit('get-questions', pin)
   socket.on('question-list', (qs) => {
     questions.value = qs
