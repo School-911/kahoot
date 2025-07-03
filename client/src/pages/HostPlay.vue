@@ -22,28 +22,37 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import socket from '../socket'
 
 const route = useRoute()
+const router = useRouter()
 const pin = route.params.pin
 const questions = ref([])
 
 onMounted(() => {
-  // ✅ Bắt buộc phải join lại phòng
+  // ✅ Quan trọng: bắt buộc phải gọi lại host-join nếu reload trang
   socket.emit('host-join', pin)
 
   socket.emit('get-questions', pin)
   socket.on('question-list', (qs) => {
     questions.value = qs
   })
+
+  // Optional: lắng nghe phản hồi khi chiếu
+  socket.on('receive-question', (data) => {
+    console.log('📥 Câu hỏi đã được chiếu:', data)
+  })
 })
 
 const sendQuestion = (index) => {
+  console.log('📤 Chiếu câu hỏi index', index)
   socket.emit('select-question', { pin, index })
 }
 
 const endGame = () => {
+  console.log('🛑 Emit end-game')
   socket.emit('end-game', pin)
+  router.push(`/host/${pin}/results`)
 }
 </script>
