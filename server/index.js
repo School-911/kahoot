@@ -41,14 +41,12 @@ app.use('/api', quizRoutes)
 app.use('/api', roomRoutes)
 app.get('/', (req, res) => res.send('Kahoot backend is running!'))
 
-// 👇 Khởi tạo socket.io & gọi file tách riêng
 const io = new Server(server, { cors: corsOptions })
 setupSocket(io)
 
-// Serve static files (đường dẫn tới thư mục build của Vue)
+// Chỗ cuối file index.js
 app.use(express.static(path.join(__dirname, 'client/dist')))
 
-// ❗ Tất cả các route khác (không phải /api) → trả về index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist', 'index.html'))
 })
