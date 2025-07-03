@@ -9,5 +9,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  server: {
+    // ⚠️ Quan trọng: Cho phép reload trang không bị 404
+    historyApiFallback: true
   }
 })
