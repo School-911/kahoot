@@ -21,6 +21,7 @@ export function setupSocket(io) {
   io.on('connection', (socket) => {
     console.log('🟢 Socket connected:', socket.id)
 
+    // ✅ Host tạo phòng
     socket.on('host-join', async (pin) => {
       const room = await Room.findOne({ pin })
       if (!room) return socket.emit('room-not-found')
@@ -39,6 +40,7 @@ export function setupSocket(io) {
       console.log(`🎮 Host đã tạo room ${pin}`)
     })
 
+    // ✅ Người chơi tham gia
     socket.on('join-game', ({ pin, name }) => {
       if (!roomExists(pin)) return socket.emit('join-failed')
 
@@ -47,8 +49,21 @@ export function setupSocket(io) {
 
       socket.join(pin)
       socket.emit('join-success')
+
+      // ✅ Emit về cho host (cập nhật danh sách người chơi)
+      io.to(pin).emit('player-joined', name)
     })
 
+    // ✅ Host yêu cầu danh sách người chơi
+    socket.on('get-players', (pin) => {
+      const room = getRoom(pin)
+      if (room) {
+        const players = room.players || []
+        socket.emit('player-list', players)
+      }
+    })
+
+    // ✅ Lấy danh sách câu hỏi
     socket.on('get-questions', (pin) => {
       const data = roomData[pin]
       if (data) {
@@ -56,6 +71,7 @@ export function setupSocket(io) {
       }
     })
 
+    // ✅ Host chọn câu để chiếu
     socket.on('select-question', ({ pin, index }) => {
       const data = roomData[pin]
       if (!data || !data.questions[index]) return
@@ -73,6 +89,7 @@ export function setupSocket(io) {
       console.log(`📤 Đã chiếu câu ${index + 1} cho phòng ${pin}`)
     })
 
+    // ✅ Người chơi chọn đáp án
     socket.on('answer-selected', async ({ pin, answerIndex }) => {
       const room = getRoom(pin)
       const data = roomData[pin]
@@ -101,6 +118,7 @@ export function setupSocket(io) {
       }
     })
 
+    // ✅ Kết thúc game
     socket.on('end-game', (pin) => {
       const players = getPlayersInRoom(pin)
       io.to(pin).emit('game-over', { players })
@@ -109,6 +127,7 @@ export function setupSocket(io) {
       resetRoom(pin)
     })
 
+    // ✅ Rời khỏi phòng
     socket.on('disconnect', () => {
       console.log('🔴 Socket disconnected:', socket.id)
     })
