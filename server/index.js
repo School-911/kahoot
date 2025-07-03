@@ -44,13 +44,6 @@ app.get('/', (req, res) => res.send('Kahoot backend is running!'))
 const io = new Server(server, { cors: corsOptions })
 setupSocket(io)
 
-// Chỗ cuối file index.js
-app.use(express.static(path.join(__dirname, 'client/dist')))
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/dist', 'index.html'))
-})
-
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`)
